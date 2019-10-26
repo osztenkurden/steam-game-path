@@ -4,7 +4,7 @@
 It looks for the path with given game id, and returns both steam installation path and game's.
 
 ## Installing
-```npm install csgogsi```
+```npm install steam-game-path```
 
 ## Example #1
 ```javascript
