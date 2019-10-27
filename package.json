@@ -1,6 +1,6 @@
 {
   "name": "steam-game-path",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "",
   "main": "./lib/index.js",
   "types": "./types/index.d.ts",
@@ -19,7 +19,7 @@
   "homepage": "https://github.com/osztenkurden/steam-game-path#readme",
   "dependencies": {
     "@node-steam/vdf": "^2.1.0",
-    "windows-registry": "^0.1.5"
+    "registry-js": "^1.9.0"
   },
   "devDependencies": {
     "@types/node": "^12.11.7"
