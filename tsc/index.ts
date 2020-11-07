@@ -1,4 +1,4 @@
-import { enumerateValues, HKEY, RegistryValueType } from 'registry-js';
+import { enumerateValues, HKEY } from 'registry-js';
 import path from 'path';
 import fs from 'fs';
 import * as VDF from '@node-steam/vdf';
@@ -16,21 +16,21 @@ interface SteamPath {
     }
 }
 
-function getAppManifest(gameId: number, libraryPath: string) {
+function verifyGameManifestPath(gameId: number, libraryPath: string) {
     if (fs.existsSync(path.join(libraryPath, `appmanifest_${gameId}.acf`))) {
         return path.join(libraryPath, `appmanifest_${gameId}.acf`);
     }
     return null;
 }
 
-function checkAllLibraries(paths: string[], gameId: number) {
-    let manifest = null;
-    paths.forEach(path => {
-        if (getAppManifest(gameId, path)) {
-            manifest = getAppManifest(gameId, path);
+function getGameManifestPath(paths: string[], gameId: number) {
+    for(const path of paths) {
+        const manifest = verifyGameManifestPath(gameId, path);
+        if (manifest && getGame(manifest)) {
+            return manifest;
         }
-    });
-    return manifest;
+    }
+    return null;
 }
 
 export function getSteamLibraries(steamPath: string) {
@@ -95,7 +95,7 @@ export function getGamePath(gameId: number): SteamPath | null {
     }
 
     libraries.push(path.join(steamPath, 'steamapps'));
-    const manifest = checkAllLibraries(libraries, gameId);
+    const manifest = getGameManifestPath(libraries, gameId);
 
     if (!manifest) {
         return {
