@@ -2,6 +2,7 @@ import { enumerateValues, HKEY } from 'registry-js';
 import path from 'path';
 import fs from 'fs';
 import * as VDF from '@node-steam/vdf';
+import { homedir } from 'os';
 
 interface GamePath {
     path: string,
@@ -54,6 +55,13 @@ export function getSteamLibraries(steamPath: string) {
 }
 
 export function getSteamPath() {
+    if(process.platform === "linux"){
+        const steamPath = path.join(homedir(), ".steam", "root");
+        if(fs.existsSync(steamPath)) {
+            return steamPath;
+        }
+        return null;
+    }
     if (process.platform !== "win32") {
         throw new Error("Unsupported operating system");
     }
@@ -71,7 +79,7 @@ function getGame(manifestDir: string) {
     const content = fs.readFileSync(manifestDir, 'UTF-8');
     try {
         const parsed = VDF.parse(content);
-        const dir = path.join(manifestDir, '..\\common', parsed.AppState.installdir);
+        const dir = path.join(manifestDir, "../", 'common', parsed.AppState.installdir);
         const name: string = parsed.AppState.name;
         return { path: dir, name };
     } catch (e) {
@@ -118,3 +126,5 @@ export function getGamePath(gameId: number): SteamPath | null {
     }
 
 }
+
+console.log(getGamePath(730));
