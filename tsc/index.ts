@@ -126,5 +126,3 @@ export function getGamePath(gameId: number): SteamPath | null {
     }
 
 }
-
-console.log(getGamePath(730));
