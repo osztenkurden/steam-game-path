@@ -80,6 +80,9 @@ function getGame(manifestDir: string) {
     try {
         const parsed = VDF.parse(content);
         const dir = path.join(manifestDir, "../", 'common', parsed.AppState.installdir);
+        if(!fs.existsSync(dir)){
+            return null;
+        }
         const name: string = parsed.AppState.name;
         return { path: dir, name };
     } catch (e) {
