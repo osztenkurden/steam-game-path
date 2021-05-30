@@ -1,11 +1,21 @@
 {
   "name": "steam-game-path",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "description": "",
-  "main": "./lib/index.js",
+  "type": "module",
+  "main": "./lib/cjs/index.js",
+  "module": "./lib/esm/index.js",
+  "exports": {
+    "import": "./lib/esm/index.js",
+    "default": "./lib/cjs/index.js"
+  },
   "types": "./types/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "transpile:cjs": "tsc -p tsconfig.json",
+    "transpile:esm": "tsc -p tsconfig.esm.json",
+    "transpile:all": "npm run transpile:cjs && npm run transpile:esm",
+    "transpile": "npm run transpile:all && npm run move-build",
+    "move-build": "mv lib/cjs/*.d.ts types/"
   },
   "repository": {
     "type": "git",
