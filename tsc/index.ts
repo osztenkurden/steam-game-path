@@ -39,13 +39,26 @@ export function getSteamLibraries(steamPath: string) {
         const content = fs.readFileSync(path.join(steamPath, 'steamapps', `libraryfolders.vdf`), 'UTF-8');
         try {
             const parsed = VDF.parse(content);
-            const libraries = parsed.LibraryFolders;
+            const libraries = parsed.LibraryFolders || parsed.libraryfolders;
             const paths: string[] = [];
-            Object.keys(libraries).forEach(key => {
-                if (typeof libraries[key] === "string") {
-                    paths.push(path.join(libraries[key], "steamapps"));
+
+            if (!libraries) {
+                return null;
+            }
+
+            const values = Object.values(libraries) as any[];
+
+            for (const value of values) {
+                if(!value){
+                    continue;
                 }
-            });
+                if (typeof value === "string") {
+                    paths.push(path.join(value, "steamapps"));
+                } else if (value && value.path) {
+                    paths.push(path.join(value.path, 'steamapps'));
+                }
+            }
+
             return paths;
         } catch (e) {
             return null;
