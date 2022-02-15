@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import * as VDF from '@node-steam/vdf';
 import { homedir } from 'os';
+import SteamUser from 'steam-user';
 
 interface GamePath {
     path: string,
@@ -25,7 +26,7 @@ function verifyGameManifestPath(gameId: number, libraryPath: string) {
 }
 
 function getGameManifestPath(paths: string[], gameId: number) {
-    for(const path of paths) {
+    for (const path of paths) {
         const manifest = verifyGameManifestPath(gameId, path);
         if (manifest && getGame(manifest)) {
             return manifest;
@@ -49,7 +50,7 @@ export function getSteamLibraries(steamPath: string) {
             const values = Object.values(libraries) as any[];
 
             for (const value of values) {
-                if(!value){
+                if (!value) {
                     continue;
                 }
                 if (typeof value === "string") {
@@ -68,9 +69,9 @@ export function getSteamLibraries(steamPath: string) {
 }
 
 export function getSteamPath() {
-    if(process.platform === "linux"){
+    if (process.platform === "linux") {
         const steamPath = path.join(homedir(), ".steam", "root");
-        if(fs.existsSync(steamPath)) {
+        if (fs.existsSync(steamPath)) {
             return steamPath;
         }
         return null;
@@ -93,7 +94,7 @@ function getGame(manifestDir: string) {
     try {
         const parsed = VDF.parse(content);
         const dir = path.join(manifestDir, "../", 'common', parsed.AppState.installdir);
-        if(!fs.existsSync(dir)){
+        if (!fs.existsSync(dir)) {
             return null;
         }
         const name: string = parsed.AppState.name;
@@ -103,12 +104,17 @@ function getGame(manifestDir: string) {
     }
 }
 
-export function getGamePath(gameId: number): SteamPath | null {
+type SteamPathWithExecutable = SteamPath & { executable: Promise<any> };
+
+
+export function getGamePath(gameId: number, findExecutable: false): SteamPath | null;
+export function getGamePath(gameId: number, findExecutable: true): SteamPathWithExecutable | null;
+export function getGamePath(gameId: number, findExecutable = false) {
     const steamPath = getSteamPath();
     if (!steamPath) return null;
 
     const libraries = getSteamLibraries(steamPath);
-    if (libraries === null)  {
+    if (libraries === null) {
         return {
             game: null,
             steam: {
@@ -126,19 +132,43 @@ export function getGamePath(gameId: number): SteamPath | null {
             game: null,
             steam: {
                 path: steamPath,
-                libraries: libraries
+                libraries: [...new Set(libraries)]
             }
         }
     }
 
     const game = getGame(manifest);
 
-    return {
-        game,
-        steam: {
-            path: steamPath,
-            libraries: libraries
+    if (!findExecutable) {
+        return {
+            game,
+            steam: {
+                path: steamPath,
+                libraries: [...new Set(libraries)]
+            }
         }
     }
 
+    const executablePromise = new Promise<any>((res, rej) => {
+
+        const client = new SteamUser();
+
+        client.on('loggedOn', async () => {
+            const gameData = await client.getProductInfo([gameId], [])
+            const gameExecutableInfo = gameData?.apps?.[gameId]?.appinfo?.config?.launch || null;
+            client.logOff();
+            res(gameExecutableInfo ? Object.values(gameExecutableInfo) : gameExecutableInfo);
+        });
+
+        client.logOn();
+    });
+
+    return {
+        game,
+        executable: executablePromise,
+        steam: {
+            path: steamPath,
+            libraries: [...new Set(libraries)]
+        }
+    }
 }
