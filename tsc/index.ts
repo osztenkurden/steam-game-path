@@ -7,7 +7,8 @@ import SteamUser from 'steam-user';
 
 interface GamePath {
     path: string,
-    name: string
+    name: string,
+    executable?: Promise<any>
 }
 
 interface SteamPath {
@@ -104,12 +105,8 @@ function getGame(manifestDir: string) {
     }
 }
 
-type SteamPathWithExecutable = SteamPath & { executable: Promise<any> };
 
-
-export function getGamePath(gameId: number, findExecutable: false): SteamPath | null;
-export function getGamePath(gameId: number, findExecutable: true): SteamPathWithExecutable | null;
-export function getGamePath(gameId: number, findExecutable = false) {
+export function getGamePath(gameId: number, findExecutable = false): SteamPath | null {
     const steamPath = getSteamPath();
     if (!steamPath) return null;
 
@@ -139,7 +136,7 @@ export function getGamePath(gameId: number, findExecutable = false) {
 
     const game = getGame(manifest);
 
-    if (!findExecutable) {
+    if (!findExecutable || !game) {
         return {
             game,
             steam: {
@@ -164,8 +161,7 @@ export function getGamePath(gameId: number, findExecutable = false) {
     });
 
     return {
-        game,
-        executable: executablePromise,
+        game: {...game, executable: executablePromise },
         steam: {
             path: steamPath,
             libraries: [...new Set(libraries)]
