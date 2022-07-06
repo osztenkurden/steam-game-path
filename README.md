@@ -17,7 +17,7 @@ const data = getGamePath(730);
 
 |Method|Description|Example|Returned objects|
 |---|---|---|---|
-|`getGamePath`|Function that takes game id and returns |`getGamePath(730)`|Path Object|
+|`getGamePath(gameId, findExecutable: boolean)`|Function that takes game id and returns |`getGamePath(730)`|Path Object|
 |`getSteamPath()`|Function that returns steam install path or null|`getSteamPath() //"E:\Program Files (x86)\Steam"`|`string`|
 
 ## Path Object Example
@@ -26,7 +26,8 @@ const data = getGamePath(730);
 {
     game: {
         path: 'C:\\SteamLibrary\\steamapps\\common\\Counter-Strike Global Offensive',
-        name: 'Counter-Strike: Global Offensive'
+        name: 'Counter-Strike: Global Offensive',
+        executable?: Promise
     },
     steam: {
         path: 'E:\\Program Files (x86)\\Steam',
