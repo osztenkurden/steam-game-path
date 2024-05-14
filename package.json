@@ -1,6 +1,6 @@
 {
   "name": "steam-game-path",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "",
   "main": "lib/index.js",
   "module": "lib/index.mjs",
