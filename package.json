@@ -1,21 +1,19 @@
 {
   "name": "steam-game-path",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "",
-  "type": "module",
-  "main": "./lib/cjs/index.js",
-  "module": "./lib/esm/index.js",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
   "exports": {
     "import": "./lib/esm/index.js",
     "default": "./lib/cjs/index.js"
   },
-  "types": "./types/index.d.ts",
   "scripts": {
-    "transpile:cjs": "tsc -p tsconfig.json",
-    "transpile:esm": "tsc -p tsconfig.esm.json",
-    "transpile:all": "npm run transpile:cjs && npm run transpile:esm",
-    "transpile": "npm run transpile:all && npm run move-build",
-    "move-build": "mv lib/cjs/*.d.ts types/"
+    "build": "tsup tsc/index.ts --format cjs,esm --dts -d lib",
+    "lint": "eslint . --ext .ts",
+    "prettier-format": "prettier --config .prettierrc --write **/*.ts",
+    "post-compile": "npm run prettier-format && npm run lint"
   },
   "repository": {
     "type": "git",
@@ -34,6 +32,8 @@
   },
   "devDependencies": {
     "@types/node": "^12.11.7",
-    "@types/steam-user": "^4.20.0"
+    "@types/steam-user": "^4.20.0",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.5"
   }
 }
