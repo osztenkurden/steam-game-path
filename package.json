@@ -1,14 +1,10 @@
 {
   "name": "steam-game-path",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
-  "exports": {
-    "import": "./lib/esm/index.js",
-    "default": "./lib/cjs/index.js"
-  },
+  "main": "lib/index.js",
+  "module": "lib/index.mjs",
+  "types": "lib/index.d.ts",
   "scripts": {
     "build": "tsup tsc/index.ts --format cjs,esm --dts -d lib",
     "lint": "eslint . --ext .ts",
