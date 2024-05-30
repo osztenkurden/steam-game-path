@@ -71,23 +71,35 @@ export function getSteamLibraries(steamPath: string) {
 }
 
 export function getSteamPath() {
-    if (process.platform === "linux") {
-        const steamPath = path.join(homedir(), ".steam", "root");
-        if (fs.existsSync(steamPath)) {
-            return steamPath;
+    switch (process.platform) {
+        case "linux": {
+            const steamPath = path.join(homedir(), ".steam", "root");
+            if (fs.existsSync(steamPath)) {
+                return steamPath;
+            }
+            return null;
         }
-        return null;
-    }
-    if (process.platform !== "win32") {
+        
+        case "win32": {
+            try {
+                const entry = enumerateValues(HKEY.HKEY_LOCAL_MACHINE, 'SOFTWARE\\WOW6432Node\\Valve\\Steam').filter(value => value.name === "InstallPath")[0];
+                const value = entry && String(entry.data) || null;
+                return value;
+            } catch (e) {
+                return null;
+            }
+        }
+        
+        case "darwin": {
+            const steamPath = path.join(homedir(), "Library", "Application Support", "Steam")
+            if (fs.existsSync(steamPath)) {
+                return steamPath;
+            }
+            return null;
+        }
+        
+        default:
         throw new Error("Unsupported operating system");
-    }
-
-    try {
-        const entry = enumerateValues(HKEY.HKEY_LOCAL_MACHINE, 'SOFTWARE\\WOW6432Node\\Valve\\Steam').filter(value => value.name === "InstallPath")[0];
-        const value = entry && String(entry.data) || null;
-        return value;
-    } catch (e) {
-        return null;
     }
 }
 
