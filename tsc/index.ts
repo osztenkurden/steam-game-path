@@ -73,7 +73,13 @@ export function getSteamLibraries(steamPath: string) {
 export function getSteamPath() {
     switch (process.platform) {
         case "linux": {
-            const steamPath = path.join(homedir(), ".steam", "root");
+            let steamPath = path.join(homedir(), ".steam", "root");
+            if (fs.existsSync(steamPath)) {
+                return steamPath;
+            }
+
+            // Flatpak
+            steamPath = path.join(homedir(), ".var", "app", "com.valvesoftware.Steam", ".local", "share", "Steam");
             if (fs.existsSync(steamPath)) {
                 return steamPath;
             }
