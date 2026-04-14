@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { parse, stringify } from '@node-steam/vdf';
 import { homedir } from 'os';
-import { type AppInfoContentGame } from 'steam-user';
+import type { AppInfoContentGame } from 'steam-user';
 
 const VDF = { parse, stringify };
 interface GamePath {
