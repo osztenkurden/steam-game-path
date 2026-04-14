@@ -3,13 +3,13 @@ import path from 'path';
 import fs from 'fs';
 import { parse, stringify } from '@node-steam/vdf';
 import { homedir } from 'os';
-import SteamUser from 'steam-user';
+import { type AppInfoContentGame } from 'steam-user';
 
 const VDF = { parse, stringify };
 interface GamePath {
 	path: string;
 	name: string;
-	executable?: Promise<any>;
+	executable?: Promise<NonNullable<NonNullable<AppInfoContentGame['config']>['launch']>[string][] | null>;
 }
 
 interface SteamPath {
@@ -166,7 +166,10 @@ export function getGamePath(gameId: number, findExecutable = false): SteamPath |
 		};
 	}
 
-	const executablePromise = new Promise<any>((res, rej) => {
+	const executablePromise = new Promise<
+		NonNullable<NonNullable<AppInfoContentGame['config']>['launch']>[string][] | null
+	>(async (res, rej) => {
+		const { default: SteamUser } = await import('steam-user');
 		const client = new SteamUser();
 		let canceled = false;
 		const timeout = setTimeout(() => {
@@ -179,12 +182,13 @@ export function getGamePath(gameId: number, findExecutable = false): SteamPath |
 			if (canceled) return;
 			const gameData = await client.getProductInfo([gameId], []);
 			clearTimeout(timeout);
-			const gameExecutableInfo = gameData?.apps?.[gameId]?.appinfo?.config?.launch || null;
+			const gameExecutableInfo =
+				(gameData?.apps?.[gameId]?.appinfo as AppInfoContentGame)?.config?.launch || null;
 			client.logOff();
 			res(gameExecutableInfo ? Object.values(gameExecutableInfo) : gameExecutableInfo);
 		});
 
-		client.logOn();
+		client.logOn({ anonymous: true });
 	});
 
 	return {

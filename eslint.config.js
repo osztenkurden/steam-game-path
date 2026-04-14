@@ -17,7 +17,8 @@ export default defineConfig(
 			'@typescript-eslint/no-var-requires': 0,
 			'no-mixed-spaces-and-tabs': ['warn', 'smart-tabs'],
 			'@typescript-eslint/explicit-function-return-type': 0,
-			'@typescript-eslint/camelcase': 0
+			'@typescript-eslint/camelcase': 0,
+			'no-async-promise-executor': 0
 		}
 	},
 	globalIgnores(['types/*', 'lib/*', 'dist/*', '__tests__', 'eslint.config.js'])
