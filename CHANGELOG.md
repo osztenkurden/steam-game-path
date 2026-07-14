@@ -1,5 +1,20 @@
 # Changelog
 
+## [3.0.2](https://github.com/osztenkurden/steam-game-path/compare/v3.0.1...v3.0.2) (2026-05-02)
+
+
+### Bug Fixes
+
+* move to release-please-action@5 ([3f7c7bb](https://github.com/osztenkurden/steam-game-path/commit/3f7c7bb8e06c6ce617ced1ca5dba82437cfd4aa7))
+
+## [3.0.1](https://github.com/osztenkurden/steam-game-path/compare/v3.0.0...v3.0.1) (2026-04-14)
+
+
+### Bug Fixes
+
+* minimize package size ([a634566](https://github.com/osztenkurden/steam-game-path/commit/a634566ada6db182e7e0136df997274e5fe4905b))
+* minimize package size ([a71cfa1](https://github.com/osztenkurden/steam-game-path/commit/a71cfa1b1f2d006a535834edf9efd89a12e16ccb))
+
 ## 3.0.0 (2026-04-14)
 
 
