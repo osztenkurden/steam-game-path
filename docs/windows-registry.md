@@ -39,13 +39,13 @@ The first candidate corresponds to the old `WOW6432Node` lookup on 64-bit Window
 
 The parser checks the requested value name case-insensitively and accepts `REG_SZ` or `REG_EXPAND_SZ`. It tolerates headers, blank lines, tabs, and spaces between columns, while retaining spaces inside the path. Expandable strings have `%VARIABLE%` references resolved from the current process environment. Empty, relative, NUL-containing, and visibly damaged UTF-8 paths are rejected.
 
-A nonzero query exit or unusable value leads to the next candidate. Failure to start the executable, a timeout, or output-buffer overflow stops the lookup and returns `null`. The queries share one 5-second timeout budget and each has a 64 KiB output limit. Console windows are hidden and diagnostics are not printed to the application's stderr.
+A nonzero query exit or unusable value leads to the next candidate. Failure to start the executable, a timeout, or output-buffer overflow stops registry discovery, causing `getSteamPath()` to return `null`. The queries share one 5-second timeout budget and each has a 64 KiB output limit. Console windows are hidden and diagnostics are not printed to the application's stderr.
 
 ## Encoding and runtime behavior
 
 The reader uses UTF-8 decoding, matching winreg's default. Non-ASCII paths depend on the encoding emitted by `reg.exe`; this implementation does not change the console code page or guarantee Unicode round trips across Windows locales. Rejecting replacement characters catches some decoding damage, but cannot recover characters already lost by the command. See [winreg's encoding notes](https://github.com/fresc81/node-winreg#processing-utf-8-data).
 
-Every lookup launches between one and four processes and blocks the calling thread. Results are not cached internally. Windows policies may block registry tools, in which case discovery returns `null`. Linux and macOS retain their filesystem-based discovery.
+Each automatic discovery launches between one and four processes and blocks the calling thread. Batch lookup shares discovery across all requested app IDs; an explicit `steamPath` bypasses it. Results are not cached between calls. Windows policies may block registry tools, in which case discovery returns `null`. Linux and macOS retain their filesystem-based discovery.
 
 ## Dependencies and validation
 

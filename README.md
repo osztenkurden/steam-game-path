@@ -9,7 +9,7 @@
 [![Downloads](https://img.shields.io/npm/dm/steam-game-path)](https://www.npmjs.com/package/steam-game-path)
 [![License: GPL 3](https://img.shields.io/badge/license-GPL%203-blue)](LICENSE)
 
-[Quick start](#quick-start) · [API reference](#api-reference) · [Supported platforms](#supported-platforms) · [Changelog](CHANGELOG.md)
+[Quick start](#quick-start) · [API reference](docs/api.md) · [Supported platforms](#supported-platforms) · [Changelog](CHANGELOG.md)
 
 </div>
 
@@ -36,16 +36,12 @@ import { getGamePath } from 'steam-game-path';
 
 const result = getGamePath(730); // Steam app ID for Counter-Strike 2
 
-if (!result) {
-	console.log('Steam was not found.');
-} else if (!result.game) {
-	console.log('Game was not found in the Steam libraries.');
-	console.log('Steam:', result.steam.path);
-} else {
+if (result.success) {
 	console.log(result.game.name);
 	console.log('Game:', result.game.path);
 	console.log('Steam:', result.steam.path);
-	console.log('Libraries:', result.steam.libraries);
+} else {
+	console.error('Lookup failed:', result.reason);
 }
 ```
 
@@ -57,7 +53,9 @@ A successful lookup returns an object like this. Game names and installation dir
 
 ```javascript
 {
+	success: true,
 	game: {
+		appId: 730,
 		path: 'C:\\SteamLibrary\\steamapps\\common\\Counter-Strike Global Offensive',
 		name: 'Counter-Strike 2'
 	},
@@ -67,32 +65,70 @@ A successful lookup returns an object like this. Game names and installation dir
 			'C:\\SteamLibrary\\steamapps',
 			'C:\\Program Files (x86)\\Steam\\steamapps'
 		]
-	}
+	},
+	issues: []
 }
 ```
 
 ## API reference
 
-| Function                               | Returns                 | Purpose                                         |
-| :------------------------------------- | :---------------------- | :---------------------------------------------- |
-| `getGamePath(gameId: number)`          | Result object or `null` | Find an installed game and its Steam libraries. |
-| `getSteamPath()`                       | `string` or `null`      | Locate the Steam installation.                  |
-| `getSteamLibraries(steamPath: string)` | `string[]` or `null`    | Read library paths from a Steam installation.   |
+| Function                         | Returns                | Purpose                                      |
+| :------------------------------- | :--------------------- | :------------------------------------------- |
+| `getGamePath(appId, options?)`   | `GamePathResult`       | Find one installed game.                     |
+| `getGamePaths(appIds, options?)` | `GamePathResult[]`     | Find several games with one Steam discovery. |
+| `getInstalledGames(options?)`    | `InstalledGamesResult` | List installed games across all libraries.   |
+| `getSteamPath()`                 | `string` or `null`     | Locate the Steam installation.               |
+| `getSteamLibraries(steamPath)`   | `string[]` or `null`   | Read the configured library paths.           |
 
-### Find a game
+Game lookups return `{ success: true, game, steam, issues }` or `{ success: false, reason }`. Check `success` before accessing the data; TypeScript narrows the exported result types automatically. Reasons include `steam-not-found`, `game-not-found`, and `install-directory-missing`. The [API reference](docs/api.md) lists every reason and exported type.
 
-`getGamePath` accepts a numeric Steam app ID and checks library manifests until it finds a matching game with an existing installation directory.
+> [!IMPORTANT]
+> `getGamePath()` now always returns an object. Replace old `if (!result)` or `if (!result.game)` checks with `if (!result.success)` and read `result.reason` on failure. Successful `game` objects also include `appId`.
 
-| Result            | Meaning                                                                                                                   |
-| :---------------- | :------------------------------------------------------------------------------------------------------------------------ |
-| `null`            | Steam was not found.                                                                                                      |
-| `game: null`      | No valid installed game was found, or the library configuration could not be parsed. Steam information is still returned. |
-| `game.path`       | The game's installation directory.                                                                                        |
-| `game.name`       | The game name recorded in its manifest.                                                                                   |
-| `steam.path`      | The Steam installation directory.                                                                                         |
-| `steam.libraries` | Unique library paths, each ending in `steamapps`.                                                                         |
+### Choose a Steam installation
 
-If `steamapps/libraryfolders.vdf` is missing or cannot be parsed, the result has `game: null` and `steam.libraries: []`. Otherwise, the default `steamapps` directory is included in the search alongside configured libraries.
+All three game lookup functions accept `{ steamPath }`. This selects an installation directly and bypasses automatic discovery, including Windows registry queries.
+
+```javascript
+import { getGamePath } from 'steam-game-path';
+
+const result = getGamePath(730, { steamPath: 'D:\\Steam' });
+```
+
+Supply the Steam installation directory, which contains `steamapps`. Relative paths are resolved against your application's working directory. An unavailable override returns `steam-not-found`; it does not fall back to another installation.
+
+### Find several games
+
+```javascript
+import { getGamePaths } from 'steam-game-path';
+
+const appIds = [730, 440, 570];
+const results = getGamePaths(appIds);
+
+for (const [index, result] of results.entries()) {
+	if (result.success) console.log(result.game.appId, result.game.path);
+	else console.log(appIds[index], result.reason);
+}
+```
+
+Results follow the input order, including duplicates. Steam discovery and library configuration are shared across the batch, and repeated app IDs are searched once. An empty input returns `[]` without accessing Steam.
+
+### List installed games
+
+```javascript
+import { getInstalledGames } from 'steam-game-path';
+
+const result = getInstalledGames();
+
+if (result.success) {
+	console.table(result.games); // { appId, name, path } entries, sorted by app ID
+	for (const issue of result.issues) console.warn(issue.code, issue.path);
+} else {
+	console.error('Could not scan Steam:', result.reason);
+}
+```
+
+Games are deduplicated by app ID; the first valid copy in library order wins. Broken manifests and unavailable libraries are reported in `issues` while valid games are retained. An empty `issues` array means no problems were encountered; an empty `games` array can be a successful scan of an empty installation.
 
 ### Find Steam and its libraries
 
@@ -110,12 +146,12 @@ if (steamPath) {
 
 Pass the Steam installation directory to `getSteamLibraries`, rather than its `steamapps` subdirectory. It supports both legacy string entries and modern object entries in `libraryfolders.vdf`.
 
-This helper returns the configured paths without deduplicating them or adding the default library. It returns `null` when the configuration is missing, malformed, or has no library section; an empty section returns `[]`.
+This helper returns the configured paths without deduplicating them or adding the default library. It returns `null` when the configuration is missing, unreadable, malformed, or has no library section; an empty section returns `[]`.
 
 ### Need executable metadata?
 
 > [!WARNING]
-> Executable metadata lookup has been removed from this package to avoid installing the large `steam-user` dependency tree for an optional feature. Use `getGamePath(appId)` for the installation directory. The second argument (`true` or `{ includeLaunchMetadata: true }`), `GetGamePathOptions`, and `game.executable` are no longer part of the API.
+> Executable metadata lookup has been removed from this package to avoid installing the large `steam-user` dependency tree for an optional feature. Use `getGamePath(appId)` for the installation directory. The previous `getGamePath(appId, true)` call and `game.executable` are no longer supported.
 
 If you need launch metadata, install [`steam-user`](https://github.com/DoctorMcKay/node-steam-user) in your application and query it separately:
 
@@ -180,7 +216,7 @@ This standalone example connects to Steam anonymously and requires internet acce
 
 Windows registry lookup calls the built-in `reg.exe` directly through Node.js, with no native addon or bundled executable. It checks both registry views with a shared 5-second timeout budget. Non-ASCII paths depend on the Windows command's output encoding. See [Windows registry implementation](docs/windows-registry.md) for details.
 
-`getSteamPath` returns `null` when Steam cannot be located through these checks. It throws on unsupported operating systems, as does `getGamePath`. File read errors can also throw, so handle exceptions where your application needs to recover from inaccessible files.
+`getSteamPath` returns `null` when Steam cannot be located through these checks. It throws on unsupported operating systems. The game lookup functions return `unsupported-platform` instead, and an explicit `steamPath` bypasses platform discovery. Filesystem failures are reported through `reason` or `issues`; invalid arguments throw `TypeError`.
 
 ## Development
 
