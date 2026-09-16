@@ -149,7 +149,6 @@ This lookup connects to Steam anonymously using `steam-user` and requires intern
 ```sh
 npm ci
 npm run typecheck
-npm run lint
 npm test
 npm run build
 ```
