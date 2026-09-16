@@ -124,7 +124,7 @@ describe('getGamePath', () => {
 		);
 	});
 
-	it('does not attach an executable promise when findExecutable is not set', () => {
+	it('returns only the local game name and installation path', () => {
 		steam.writeLibraryFolders([]);
 		steam.addGameManifest(steam.steamAppsDir, {
 			appId: 730,
@@ -134,6 +134,9 @@ describe('getGamePath', () => {
 
 		const result = getGamePath(730);
 		assert.ok(result?.game);
-		assert.equal(result.game.executable, undefined);
+		assert.deepEqual(result.game, {
+			name: 'CS',
+			path: path.join(steam.steamAppsDir, 'common', 'CS')
+		});
 	});
 });

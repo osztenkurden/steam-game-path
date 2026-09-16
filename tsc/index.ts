@@ -1,15 +1,13 @@
-import { enumerateValues, HKEY } from 'registry-js';
+import { getWindowsSteamPath } from './windowsSteamPath.ts';
 import path from 'path';
 import fs from 'fs';
 import { parse, stringify } from '@node-steam/vdf';
 import { homedir } from 'os';
-import type { AppInfoContentGame } from 'steam-user';
 
 const VDF = { parse, stringify };
 interface GamePath {
 	path: string;
 	name: string;
-	executable?: Promise<NonNullable<NonNullable<AppInfoContentGame['config']>['launch']>[string][] | null>;
 }
 
 interface SteamPath {
@@ -86,17 +84,8 @@ export function getSteamPath() {
 			return null;
 		}
 
-		case 'win32': {
-			try {
-				const entry = enumerateValues(HKEY.HKEY_LOCAL_MACHINE, 'SOFTWARE\\WOW6432Node\\Valve\\Steam').filter(
-					value => value.name === 'InstallPath'
-				)[0];
-				const value = (entry && String(entry.data)) || null;
-				return value;
-			} catch {
-				return null;
-			}
-		}
+		case 'win32':
+			return getWindowsSteamPath();
 
 		case 'darwin': {
 			const steamPath = path.join(homedir(), 'Library', 'Application Support', 'Steam');
@@ -126,7 +115,7 @@ function getGame(manifestDir: string) {
 	}
 }
 
-export function getGamePath(gameId: number, findExecutable = false): SteamPath | null {
+export function getGamePath(gameId: number): SteamPath | null {
 	const steamPath = getSteamPath();
 	if (!steamPath) return null;
 
@@ -156,43 +145,8 @@ export function getGamePath(gameId: number, findExecutable = false): SteamPath |
 
 	const game = getGame(manifest);
 
-	if (!findExecutable || !game) {
-		return {
-			game,
-			steam: {
-				path: steamPath,
-				libraries: [...new Set(libraries)]
-			}
-		};
-	}
-
-	const executablePromise = new Promise<
-		NonNullable<NonNullable<AppInfoContentGame['config']>['launch']>[string][] | null
-	>(async (res, rej) => {
-		const { default: SteamUser } = await import('steam-user');
-		const client = new SteamUser();
-		let canceled = false;
-		const timeout = setTimeout(() => {
-			canceled = true;
-			client.logOff();
-			rej(new Error('Timed out while trying to retrieve game executable information from Steam'));
-		}, 10_000);
-
-		client.on('loggedOn', async () => {
-			if (canceled) return;
-			const gameData = await client.getProductInfo([gameId], []);
-			clearTimeout(timeout);
-			const gameExecutableInfo =
-				(gameData?.apps?.[gameId]?.appinfo as AppInfoContentGame)?.config?.launch || null;
-			client.logOff();
-			res(gameExecutableInfo ? Object.values(gameExecutableInfo) : gameExecutableInfo);
-		});
-
-		client.logOn({ anonymous: true });
-	});
-
 	return {
-		game: { ...game, executable: executablePromise },
+		game,
 		steam: {
 			path: steamPath,
 			libraries: [...new Set(libraries)]
