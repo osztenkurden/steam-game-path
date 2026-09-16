@@ -2,7 +2,7 @@ import { getWindowsSteamPath } from './windowsSteamPath.ts';
 import path from 'node:path';
 import fs from 'node:fs';
 import { homedir } from 'node:os';
-import { parse } from '@node-steam/vdf';
+import { parse } from './vdf.ts';
 import type { GamePathOptions, LookupIssue, SteamFailureReason, SteamInstallation } from './types.ts';
 
 export function getSteamPath() {
@@ -61,7 +61,7 @@ function readLibraryConfig(steamPath: string): LibraryConfig {
 	}
 
 	try {
-		const parsed: unknown = parse(content);
+		const parsed: unknown = parse(content, { coerceValues: false });
 		const section = isRecord(parsed) ? (parsed.LibraryFolders ?? parsed.libraryfolders) : undefined;
 		if (!isRecord(section)) throw new Error('Missing library section');
 		const libraries: string[] = [];

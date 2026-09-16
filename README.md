@@ -15,7 +15,7 @@
 
 `steam-game-path` locates Steam, reads its library configuration, and checks game manifests for an installed game. Use it to find game files across the default installation and additional Steam libraries on Windows, Linux, and macOS.
 
-Path lookups are synchronous and use local files. The package has one runtime dependency: the VDF parser.
+Path lookups are synchronous and use local files. The package has zero runtime dependencies, including its own [VDF parser](docs/vdf.md).
 
 ## Quick start
 

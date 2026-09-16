@@ -30,9 +30,6 @@
 		"node": ">=22.12.0"
 	},
 	"homepage": "https://github.com/osztenkurden/steam-game-path#readme",
-	"dependencies": {
-		"@node-steam/vdf": "^2.2.0"
-	},
 	"devDependencies": {
 		"@types/node": "^22.20.3",
 		"prettier": "^3.9.7",

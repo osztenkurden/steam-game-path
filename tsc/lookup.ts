@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { parse } from '@node-steam/vdf';
+import { parse } from './vdf.ts';
 import { errorCode, isRecord, loadSteam, validateOptions, type SteamContext } from './steam.ts';
 import type { GamePathOptions, GamePathResult, InstalledGame, InstalledGamesResult, LookupIssue } from './types.ts';
 
@@ -32,7 +32,7 @@ function readGame(appId: number, library: string): ManifestResult {
 	let name: string;
 	let directory: string;
 	try {
-		const parsed: unknown = parse(content);
+		const parsed: unknown = parse(content, { coerceValues: false });
 		const state = isRecord(parsed) ? parsed.AppState : undefined;
 		if (
 			!isRecord(state) ||
