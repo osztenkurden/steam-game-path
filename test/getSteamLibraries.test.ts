@@ -77,4 +77,17 @@ describe('getSteamLibraries', () => {
 			path.join(libA, 'steamapps')
 		]);
 	});
+	it('ignores legacy metadata fields instead of treating timestamps as libraries', () => {
+		steam = createFakeSteam();
+		steam.writeLibraryFoldersRaw(
+			`"libraryfolders"\n{\n"TimeNextStatsReport" "100"\n"0" ${JSON.stringify(steam.steamDir)}\n}`
+		);
+		assert.deepEqual(getSteamLibraries(steam.steamDir), [steam.steamAppsDir]);
+	});
+
+	it('rejects malformed library entries', () => {
+		steam = createFakeSteam();
+		steam.writeLibraryFoldersRaw('"libraryfolders"\n{\n"0"\n{\n"label" "missing path"\n}\n}');
+		assert.equal(getSteamLibraries(steam.steamDir), null);
+	});
 });
