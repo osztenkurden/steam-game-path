@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.0.0](https://github.com/osztenkurden/steam-game-path/compare/v3.0.2...v4.0.0) (2026-09-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* new api surface
+* removed finding executable and moved to standalone winreg
+
+### Features
+
+* move to internal vdf ([4b6051e](https://github.com/osztenkurden/steam-game-path/commit/4b6051ea1f8da00f9575339764475356ac5dbe40))
+* new api surface ([ce91c99](https://github.com/osztenkurden/steam-game-path/commit/ce91c990a3adaa8951ec7cd519adc79f2f56dd93))
+* removed finding executable and moved to standalone winreg ([36751a4](https://github.com/osztenkurden/steam-game-path/commit/36751a40674c69d0ec2f75f2a2e01724878220b2))
+
 ## [3.0.2](https://github.com/osztenkurden/steam-game-path/compare/v3.0.1...v3.0.2) (2026-05-02)
 
 
