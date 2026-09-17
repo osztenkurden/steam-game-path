@@ -1,6 +1,6 @@
 {
 	"name": "steam-game-path",
-	"version": "4.0.0",
+	"version": "4.0.1",
 	"description": "Get installed Steam games and their library paths on Windows, Linux, and macOS with zero runtime dependencies.",
 	"type": "module",
 	"types": "dist/index.d.mts",

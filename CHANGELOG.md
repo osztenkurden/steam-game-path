@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.1](https://github.com/osztenkurden/steam-game-path/compare/v4.0.0...v4.0.1) (2026-09-17)
+
+
+### Bug Fixes
+
+* npm desc ([e649cff](https://github.com/osztenkurden/steam-game-path/commit/e649cffe21fd70c3b7e8ee8ff4f5953b157172da))
+
 ## [4.0.0](https://github.com/osztenkurden/steam-game-path/compare/v3.0.2...v4.0.0) (2026-09-16)
 
 
