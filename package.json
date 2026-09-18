@@ -23,7 +23,7 @@
 		"url": "git+https://github.com/osztenkurden/steam-game-path.git"
 	},
 	"author": "Hubert Walczak <hubertwalczak8@gmail.com> (https://hwalczak.com/)",
-	"license": "GPL-3.0",
+	"license": "MPL-2.0",
 	"bugs": {
 		"url": "https://github.com/osztenkurden/steam-game-path/issues"
 	},

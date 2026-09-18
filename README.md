@@ -7,7 +7,7 @@
 [![npm version](https://img.shields.io/npm/v/steam-game-path?color=cb6b26)](https://www.npmjs.com/package/steam-game-path)
 [![CI](https://github.com/osztenkurden/steam-game-path/actions/workflows/main.yaml/badge.svg)](https://github.com/osztenkurden/steam-game-path/actions/workflows/main.yaml)
 [![Downloads](https://img.shields.io/npm/dm/steam-game-path)](https://www.npmjs.com/package/steam-game-path)
-[![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE)
+[![License: MPL-2.0](https://img.shields.io/badge/license-MPL--2.0-blue)](LICENSE)
 
 [Quick start](#quick-start) · [API reference](docs/api.md) · [Supported platforms](#supported-platforms) · [Changelog](CHANGELOG.md)
 
@@ -229,4 +229,6 @@ npm run build
 
 ## License
 
-[GPL 3](LICENSE)
+Copyright (c) 2019–2026 Hubert Walczak and contributors.
+
+[Mozilla Public License 2.0](LICENSE)
